@@ -8,35 +8,56 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header: Greeting & Jam -->
+    <!-- Tombol Dark Mode -->
+    <div class="top-bar">
+      <button id="theme-toggle">🌙 Mode Gelap</button>
+    </div>
+
+    <!-- 1. GREETING & JAM -->
     <header class="card">
       <h1 id="greeting">Selamat Datang!</h1>
       <h2 id="clock">00:00:00</h2>
     </header>
 
-    <!-- Focus Timer -->
+    <!-- 2. FOCUS TIMER -->
     <section class="card">
-      <h3>⏱️ Focus Timer (25 Min)</h3>
+      <h3>⏱️ Focus Timer (<span id="timer-label">25</span> Min)</h3>
       <div id="timer">25:00</div>
-      <button id="start-btn">Start</button>
-      <button id="stop-btn">Stop</button>
-      <button id="reset-btn">Reset</button>
+      <div class="timer-controls">
+        <button id="start-btn" class="btn-primary">Start</button>
+        <button id="stop-btn" class="btn-warning">Stop</button>
+        <button id="reset-btn" class="btn-danger">Reset</button>
+      </div>
+      <!-- Challenge: Ubah Waktu Pomodoro -->
+      <div class="custom-timer">
+        <button onclick="setTimerDuration(15)">15 Min</button>
+        <button onclick="setTimerDuration(25)">25 Min</button>
+        <button onclick="setTimerDuration(50)">50 Min</button>
+      </div>
     </section>
 
-    <!-- To-Do List -->
+    <!-- 3. TO-DO LIST -->
     <section class="card">
       <h3>📋 To-Do List</h3>
-      <input type="text" id="task-input" placeholder="Tambah tugas baru...">
-      <button id="add-btn">Tambah</button>
+      <div class="input-group">
+        <input type="text" id="task-input" placeholder="Tambah tugas baru...">
+        <button id="add-btn" class="btn-primary">Tambah</button>
+      </div>
       <ul id="task-list"></ul>
     </section>
 
-    <!-- Quick Links -->
+    <!-- 4. QUICK LINKS -->
     <section class="card">
       <h3>🔗 Quick Links</h3>
-      <div id="quick-links"></div>
+      <div class="input-group">
+        <input type="text" id="link-name" placeholder="Nama Web (misal: Google)">
+        <input type="text" id="link-url" placeholder="URL (misal: https://google.com)">
+        <button id="add-link-btn" class="btn-primary">Tambah Link</button>
+      </div>
+      <div id="quick-links-container" class="links-grid"></div>
     </section>
   </div>
+
   <script src="js/script.js"></script>
 </body>
 </html>
