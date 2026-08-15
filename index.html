@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header: Greeting & Jam -->
+    <header class="card">
+      <h1 id="greeting">Selamat Datang!</h1>
+      <h2 id="clock">00:00:00</h2>
+    </header>
+
+    <!-- Focus Timer -->
+    <section class="card">
+      <h3>⏱️ Focus Timer (25 Min)</h3>
+      <div id="timer">25:00</div>
+      <button id="start-btn">Start</button>
+      <button id="stop-btn">Stop</button>
+      <button id="reset-btn">Reset</button>
+    </section>
+
+    <!-- To-Do List -->
+    <section class="card">
+      <h3>📋 To-Do List</h3>
+      <input type="text" id="task-input" placeholder="Tambah tugas baru...">
+      <button id="add-btn">Tambah</button>
+      <ul id="task-list"></ul>
+    </section>
+
+    <!-- Quick Links -->
+    <section class="card">
+      <h3>🔗 Quick Links</h3>
+      <div id="quick-links"></div>
+    </section>
+  </div>
+  <script src="js/script.js"></script>
+</body>
+</html>
