@@ -1,29 +1,37 @@
-// 1. JAM REAL-TIME & SAPAAN
+// 1. SAPAAN NAMA KUSTOM & JAM REAL-TIME (Challenge 1)
+const userName = "Novia"; // Nama Kustom Kamu
+
 function updateClock() {
   const now = new Date();
   const hours = now.getHours();
   
-  const timeString = now.toLocaleTimeString('id-ID');
-  document.getElementById('clock').innerText = timeString;
+  document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID');
   
   let greet = "Selamat Malam";
   if (hours >= 5 && hours < 12) greet = "Selamat Pagi";
   else if (hours >= 12 && hours < 15) greet = "Selamat Siang";
   else if (hours >= 15 && hours < 18) greet = "Selamat Sore";
   
-  document.getElementById('greeting').innerText = greet;
+  document.getElementById('greeting').innerText = `${greet}, ${userName}! ✨`;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// 2. FOCUS TIMER (25 MENIT)
-let timeLeft = 25 * 60;
+// 2. LIGHT / DARK MODE (Challenge 2)
+const themeToggleBtn = document.getElementById('theme-toggle');
+themeToggleBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  themeToggleBtn.innerText = isDark ? "☀️ Mode Terang" : "🌙 Mode Gelap";
+});
+
+// 3. FOCUS TIMER & EDIT DURASI (Challenge 3)
+let defaultMinutes = 25;
+let timeLeft = defaultMinutes * 60;
 let timerInterval = null;
 
 const timerDisplay = document.getElementById('timer');
-const startBtn = document.getElementById('start-btn');
-const stopBtn = document.getElementById('stop-btn');
-const resetBtn = document.getElementById('reset-btn');
+const timerLabel = document.getElementById('timer-label');
 
 function updateTimerDisplay() {
   const minutes = Math.floor(timeLeft / 60);
@@ -31,7 +39,16 @@ function updateTimerDisplay() {
   timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-startBtn.addEventListener('click', () => {
+function setTimerDuration(mins) {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  defaultMinutes = mins;
+  timeLeft = mins * 60;
+  timerLabel.innerText = mins;
+  updateTimerDisplay();
+}
+
+document.getElementById('start-btn').addEventListener('click', () => {
   if (timerInterval !== null) return;
   timerInterval = setInterval(() => {
     if (timeLeft > 0) {
@@ -45,89 +62,94 @@ startBtn.addEventListener('click', () => {
   }, 1000);
 });
 
-stopBtn.addEventListener('click', () => {
+document.getElementById('stop-btn').addEventListener('click', () => {
   clearInterval(timerInterval);
   timerInterval = null;
 });
 
-resetBtn.addEventListener('click', () => {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  timeLeft = 25 * 60;
-  updateTimerDisplay();
+document.getElementById('reset-btn').addEventListener('click', () => {
+  setTimerDuration(defaultMinutes);
 });
 
 updateTimerDisplay();
 
-// 3. TO-DO LIST (BISA TAMBAH, HAPUS, & DISIMPAN)
+// 4. TO-DO LIST (LOCAL STORAGE)
 const taskInput = document.getElementById('task-input');
-const addBtn = document.getElementById('add-btn');
 const taskList = document.getElementById('task-list');
-
-// Ambil tugas dari LocalStorage saat halaman dimuat
-let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+let tasks = JSON.parse(localStorage.getItem('myDashboardTasks')) || [];
 
 function saveAndRenderTasks() {
-  localStorage.setItem('myTasks', JSON.stringify(tasks));
+  localStorage.setItem('myDashboardTasks', JSON.stringify(tasks));
   taskList.innerHTML = '';
   
   tasks.forEach((task, index) => {
     const li = document.createElement('li');
-    li.style.display = 'flex';
-    li.style.justifyContent = 'space-between';
-    li.style.alignItems = 'center';
-    li.style.margin = '8px 0';
     
-    // Teks Tugas (Bisa diklik untuk tandai selesai)
-    const taskSpan = document.createElement('span');
-    taskSpan.innerText = task.text;
+    const span = document.createElement('span');
+    span.innerText = task.text;
     if (task.completed) {
-      taskSpan.style.textDecoration = 'line-through';
-      taskSpan.style.color = 'gray';
+      span.style.textDecoration = 'line-through';
+      span.style.opacity = '0.6';
     }
-    taskSpan.style.cursor = 'pointer';
-    taskSpan.addEventListener('click', () => toggleTask(index));
+    span.style.cursor = 'pointer';
+    span.onclick = () => {
+      tasks[index].completed = !tasks[index].completed;
+      saveAndRenderTasks();
+    };
     
-    // Tombol Hapus
-    const deleteBtn = document.createElement('button');
-    deleteBtn.innerText = '❌';
-    deleteBtn.style.padding = '2px 6px';
-    deleteBtn.style.cursor = 'pointer';
-    deleteBtn.addEventListener('click', () => deleteTask(index));
+    const delBtn = document.createElement('button');
+    delBtn.innerText = '🗑️';
+    delBtn.className = 'btn-danger';
+    delBtn.onclick = () => {
+      tasks.splice(index, 1);
+      saveAndRenderTasks();
+    };
     
-    li.appendChild(taskSpan);
-    li.appendChild(deleteBtn);
+    li.appendChild(span);
+    li.appendChild(delBtn);
     taskList.appendChild(li);
   });
 }
 
-// Fungsi Tambah Tugas
-function addTask() {
+document.getElementById('add-btn').onclick = () => {
   const text = taskInput.value.trim();
-  if (text === '') return alert('Ketik tugasnya dulu ya!');
-  
+  if (!text) return alert("Ketik tugasnya dulu ya!");
   tasks.push({ text: text, completed: false });
   taskInput.value = '';
   saveAndRenderTasks();
-}
-
-// Fungsi Tandai Selesai / Belum
-function toggleTask(index) {
-  tasks[index].completed = !tasks[index].completed;
-  saveAndRenderTasks();
-}
-
-// Fungsi Hapus Tugas
-function deleteTask(index) {
-  tasks.splice(index, 1);
-  saveAndRenderTasks();
-}
-
-// Listener Tombol Tambah & Tombol Enter
-addBtn.addEventListener('click', addTask);
-taskInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') addTask();
-});
-
-// Tampilkan tugas yang ada saat pertama kali dibuka
+};
 saveAndRenderTasks();
+
+// 5. QUICK LINKS (LOCAL STORAGE)
+const linkNameInput = document.getElementById('link-name');
+const linkUrlInput = document.getElementById('link-url');
+const linksContainer = document.getElementById('quick-links-container');
+let quickLinks = JSON.parse(localStorage.getItem('myDashboardLinks')) || [
+  { name: 'Google', url: 'https://google.com' },
+  { name: 'GitHub', url: 'https://github.com' }
+];
+
+function saveAndRenderLinks() {
+  localStorage.setItem('myDashboardLinks', JSON.stringify(quickLinks));
+  linksContainer.innerHTML = '';
+  
+  quickLinks.forEach((link) => {
+    const a = document.createElement('a');
+    a.href = link.url.startsWith('http') ? link.url : `https://${link.url}`;
+    a.target = '_blank';
+    a.className = 'link-btn';
+    a.innerText = link.name;
+    linksContainer.appendChild(a);
+  });
+}
+
+document.getElementById('add-link-btn').onclick = () => {
+  const name = linkNameInput.value.trim();
+  const url = linkUrlInput.value.trim();
+  if (!name || !url) return alert("Isi nama dan URL websitenya!");
+  quickLinks.push({ name, url });
+  linkNameInput.value = '';
+  linkUrlInput.value = '';
+  saveAndRenderLinks();
+};
+saveAndRenderLinks();
