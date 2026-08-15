@@ -1,51 +1,36 @@
-// 1. SAPAAN NAMA KUSTOM & JAM REAL-TIME (Challenge 1)
-const userName = "Novia"; // Nama Kustom Kamu
-
+// 1. CLOCK & DATE & GREETING
 function updateClock() {
   const now = new Date();
   const hours = now.getHours();
   
-  document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID');
+  // Format Jam
+  const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+  document.getElementById('clock').innerText = timeString;
   
-  let greet = "Selamat Malam";
-  if (hours >= 5 && hours < 12) greet = "Selamat Pagi";
-  else if (hours >= 12 && hours < 15) greet = "Selamat Siang";
-  else if (hours >= 15 && hours < 18) greet = "Selamat Sore";
+  // Format Tanggal
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('date').innerText = now.toLocaleDateString('en-US', options);
   
-  document.getElementById('greeting').innerText = `${greet}, ${userName}! ✨`;
+  // Greeting
+  let greet = "Good Evening";
+  if (hours >= 5 && hours < 12) greet = "Good Morning";
+  else if (hours >= 12 && hours < 17) greet = "Good Afternoon";
+  
+  document.getElementById('greeting').innerText = greet;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// 2. LIGHT / DARK MODE (Challenge 2)
-const themeToggleBtn = document.getElementById('theme-toggle');
-themeToggleBtn.addEventListener('click', () => {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  themeToggleBtn.innerText = isDark ? "☀️ Mode Terang" : "🌙 Mode Gelap";
-});
-
-// 3. FOCUS TIMER & EDIT DURASI (Challenge 3)
-let defaultMinutes = 25;
-let timeLeft = defaultMinutes * 60;
+// 2. FOCUS TIMER
+let timeLeft = 25 * 60;
 let timerInterval = null;
 
 const timerDisplay = document.getElementById('timer');
-const timerLabel = document.getElementById('timer-label');
 
 function updateTimerDisplay() {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
-function setTimerDuration(mins) {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  defaultMinutes = mins;
-  timeLeft = mins * 60;
-  timerLabel.innerText = mins;
-  updateTimerDisplay();
 }
 
 document.getElementById('start-btn').addEventListener('click', () => {
@@ -57,7 +42,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
     } else {
       clearInterval(timerInterval);
       timerInterval = null;
-      alert("Waktu fokus selesai!");
+      alert("Timer finished!");
     }
   }, 1000);
 });
@@ -68,15 +53,20 @@ document.getElementById('stop-btn').addEventListener('click', () => {
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
-  setTimerDuration(defaultMinutes);
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timeLeft = 25 * 60;
+  updateTimerDisplay();
 });
-
 updateTimerDisplay();
 
-// 4. TO-DO LIST (LOCAL STORAGE)
+// 3. TASKS
 const taskInput = document.getElementById('task-input');
 const taskList = document.getElementById('task-list');
-let tasks = JSON.parse(localStorage.getItem('myDashboardTasks')) || [];
+let tasks = JSON.parse(localStorage.getItem('myDashboardTasks')) || [
+  { text: 'belanja', completed: false },
+  { text: 'belajar', completed: false }
+];
 
 function saveAndRenderTasks() {
   localStorage.setItem('myDashboardTasks', JSON.stringify(tasks));
@@ -84,69 +74,93 @@ function saveAndRenderTasks() {
   
   tasks.forEach((task, index) => {
     const li = document.createElement('li');
+    li.className = 'task-item';
     
-    const span = document.createElement('span');
-    span.innerText = task.text;
-    if (task.completed) {
-      span.style.textDecoration = 'line-through';
-      span.style.opacity = '0.6';
-    }
-    span.style.cursor = 'pointer';
-    span.onclick = () => {
+    const leftDiv = document.createElement('div');
+    leftDiv.className = 'task-left';
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = task.completed;
+    checkbox.onclick = () => {
       tasks[index].completed = !tasks[index].completed;
       saveAndRenderTasks();
     };
     
+    const span = document.createElement('span');
+    span.className = `task-text ${task.completed ? 'completed' : ''}`;
+    span.innerText = task.text;
+    
+    leftDiv.appendChild(checkbox);
+    leftDiv.appendChild(span);
+    
     const delBtn = document.createElement('button');
-    delBtn.innerText = '🗑️';
-    delBtn.className = 'btn-danger';
+    delBtn.innerText = 'Delete';
+    delBtn.className = 'btn btn-danger';
     delBtn.onclick = () => {
       tasks.splice(index, 1);
       saveAndRenderTasks();
     };
     
-    li.appendChild(span);
+    li.appendChild(leftDiv);
     li.appendChild(delBtn);
     taskList.appendChild(li);
   });
 }
 
-document.getElementById('add-btn').onclick = () => {
+document.getElementById('add-task-btn').onclick = () => {
   const text = taskInput.value.trim();
-  if (!text) return alert("Ketik tugasnya dulu ya!");
+  if (!text) return;
   tasks.push({ text: text, completed: false });
   taskInput.value = '';
   saveAndRenderTasks();
 };
 saveAndRenderTasks();
 
-// 5. QUICK LINKS (LOCAL STORAGE)
+// 4. QUICK LINKS
 const linkNameInput = document.getElementById('link-name');
 const linkUrlInput = document.getElementById('link-url');
 const linksContainer = document.getElementById('quick-links-container');
 let quickLinks = JSON.parse(localStorage.getItem('myDashboardLinks')) || [
   { name: 'Google', url: 'https://google.com' },
-  { name: 'GitHub', url: 'https://github.com' }
+  { name: 'Gmail', url: 'https://mail.google.com' },
+  { name: 'Calendar', url: 'https://calendar.google.com' }
 ];
 
 function saveAndRenderLinks() {
   localStorage.setItem('myDashboardLinks', JSON.stringify(quickLinks));
   linksContainer.innerHTML = '';
   
-  quickLinks.forEach((link) => {
+  quickLinks.forEach((link, index) => {
+    const chip = document.createElement('div');
+    chip.className = 'link-chip';
+    
     const a = document.createElement('a');
     a.href = link.url.startsWith('http') ? link.url : `https://${link.url}`;
     a.target = '_blank';
-    a.className = 'link-btn';
+    a.style.color = 'white';
+    a.style.textDecoration = 'none';
     a.innerText = link.name;
-    linksContainer.appendChild(a);
+    
+    const removeBtn = document.createElement('span');
+    removeBtn.className = 'remove-link';
+    removeBtn.innerText = '✕';
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      quickLinks.splice(index, 1);
+      saveAndRenderLinks();
+    };
+    
+    chip.appendChild(a);
+    chip.appendChild(removeBtn);
+    linksContainer.appendChild(chip);
   });
 }
 
 document.getElementById('add-link-btn').onclick = () => {
   const name = linkNameInput.value.trim();
   const url = linkUrlInput.value.trim();
-  if (!name || !url) return alert("Isi nama dan URL websitenya!");
+  if (!name || !url) return;
   quickLinks.push({ name, url });
   linkNameInput.value = '';
   linkUrlInput.value = '';
